@@ -42,7 +42,6 @@ const boardReducer = (state: BoardState, action: BoardAction) => {
 
             if (action.payload.value) {
                 moves = getChessPieceMoves(action.payload.key, action.payload.value);
-                console.log(moves);
             }
 
             // TODO: filter suggested moves

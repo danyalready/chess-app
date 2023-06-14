@@ -18,6 +18,7 @@ const Board = () => {
                             className={css.mergeModifiers('board-square', [
                                 selectedSquare?.key === square.key ? 'selected' : '',
                                 square.value ? 'grabble' : '',
+                                square.isMove ? 'move' : '',
                             ])}
                             onClick={() => selectSquare(dispatch, square)}
                         >
