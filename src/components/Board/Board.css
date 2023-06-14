@@ -1,0 +1,49 @@
+.board {
+    user-select: none;
+
+    display: flex;
+    flex-direction: column;
+    width: 800px;
+    height: 800px;
+}
+
+.board-row {
+    display: flex;
+}
+.board-row:nth-child(odd) .board-square:nth-child(even) {
+    background-color: var(--square-black);
+}
+.board-row:nth-child(even) .board-square:nth-child(odd) {
+    background-color: var(--square-black);
+}
+
+.board-square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    font-size: 100px;
+    overflow: hidden;
+
+    background-color: var(--square-white);
+}
+
+.board-square--grabble {
+    cursor: grab;
+}
+.board-square--grabble:active {
+    cursor: grabbing;
+}
+
+.board-square--selected {
+    background-color: var(--square-active) !important;
+}
+
+.board-square--attack {
+    opacity: 0.15;
+}
+
+.board-square--move {
+    opacity: 0.15;
+}

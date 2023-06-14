@@ -1,0 +1,12 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --square-black: #759656;
+    --square-white: #eeeed2;
+    --square-active: #bbc940;
+    --square-attack: #bbc940;
+}
