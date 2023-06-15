@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { getPieceEmoji } from 'src/utils/chess';
 import * as css from 'src/utils/css';
@@ -8,6 +8,7 @@ import { selectSquare, unselectSquare } from 'src/actions/board';
 import './Board.css';
 
 const Board = () => {
+    const boardRef = useRef<HTMLDivElement>(null);
     const [{ board, selectedSquare }, dispatch] = useChess();
 
     useEffect(() => {
@@ -16,10 +17,16 @@ const Board = () => {
                 unselectSquare(dispatch);
             }
         });
+
+        window.addEventListener('click', (event) => {
+            if (!boardRef.current?.contains(event.target as Node)) {
+                unselectSquare(dispatch);
+            }
+        });
     }, [dispatch]);
 
     return (
-        <div className='board'>
+        <div className='board' ref={boardRef}>
             {board.map((row, rowIndex) => (
                 <div key={rowIndex} className='board-row'>
                     {row.map((square) => (
