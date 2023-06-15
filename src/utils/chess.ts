@@ -158,7 +158,13 @@ function getBishopMoves(fileIndex: number, rankIndex: number, takenEncryptedMove
         let targetRank = rankIndex + offsetRank;
 
         while (targetFile >= 0 && targetFile < 8 && targetRank >= 0 && targetRank < 8) {
-            encryptedMoves.push(encrypt([targetFile, targetRank]));
+            const encryptedMove = encrypt([targetFile, targetRank]);
+
+            if (takenEncryptedMoves?.includes(encryptedMove)) {
+                break;
+            }
+
+            encryptedMoves.push(encryptedMove);
 
             targetFile += offsetFile;
             targetRank += offsetRank;
