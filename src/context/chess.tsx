@@ -42,7 +42,7 @@ const chessReducer = (state: ChessState, action: ChessAction) => {
             const takenSquareKeys = new Set<string>();
             for (const row of state.board) {
                 for (const square of row) {
-                    if (square.value) {
+                    if (square.value?.charAt(0) === action.payload.value?.charAt(0)) {
                         takenSquareKeys.add(square.key);
                     }
                 }
