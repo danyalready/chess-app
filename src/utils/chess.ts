@@ -112,12 +112,20 @@ function getPawnMoves(
 
     // Single move forward
     if (rankIndex + direction >= 0 && rankIndex + direction < 8) {
-        encryptedMoves.push(encrypt([fileIndex, rankIndex + direction]));
+        const encryptedMove = encrypt([fileIndex, rankIndex + direction]);
+
+        if (!takenEncryptedMoves?.includes(encryptedMove)) {
+            encryptedMoves.push(encryptedMove);
+        }
     }
 
     // Double move forward from the starting rank
     if ((rankIndex === 1 && pieceColor === 'w') || (rankIndex === 6 && pieceColor === 'b')) {
-        encryptedMoves.push(encrypt([fileIndex, rankIndex + 2 * direction]));
+        const encryptedMove = encrypt([fileIndex, rankIndex + 2 * direction]);
+
+        if (!takenEncryptedMoves?.includes(encryptedMove)) {
+            encryptedMoves.push(encryptedMove);
+        }
     }
 
     return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
