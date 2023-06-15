@@ -71,13 +71,21 @@ function encrypt(move: Move): EncryptedMove {
     return fileIndex + rankIndex * 8;
 }
 
-export function getChessPieceMoves(squareKey: string, piece: Piece, takenKeys?: string[]): string[] {
+export function getChessPieceMoves(
+    squareKey: string,
+    piece: Piece,
+    takenKeys: { capturedKeys: string[]; occupiedKeys: string[] }
+): string[] {
     // Convert square key to file and rank indices
     const fileIndex = FILE_LETTERS.indexOf(squareKey.charAt(0));
     const rankIndex = RANK_NUMBERS.indexOf(squareKey.charAt(1));
 
-    const takenMoves: Move[] = (takenKeys || []).map((takenKey) => keyToMove(takenKey));
-    const takenEncryptedMoves = takenMoves.map((move) => encrypt(move));
+    const { capturedKeys, occupiedKeys } = takenKeys;
+    const capturedMoves = capturedKeys.map((capturedKey) => keyToMove(capturedKey));
+    const occupiedMoves = occupiedKeys.map((occupiedKey) => keyToMove(occupiedKey));
+
+    const encryptedCapturedMoves = capturedMoves.map((capturedMove) => encrypt(capturedMove));
+    const encryptedOccupiedMoves = occupiedMoves.map((occupiedMove) => encrypt(occupiedMove));
 
     const pieceColor = piece.charAt(0);
     const pieceName = piece.charAt(1);
@@ -91,17 +99,25 @@ export function getChessPieceMoves(squareKey: string, piece: Piece, takenKeys?: 
     // Determine possible moves based on piece name and color
     switch (pieceName) {
         case 'p':
-            return getPawnMoves(fileIndex, rankIndex, pieceColor, takenEncryptedMoves).map((move) => moveToKey(move));
+            return getPawnMoves(fileIndex, rankIndex, pieceColor, encryptedOccupiedMoves).map((move) =>
+                moveToKey(move)
+            );
         case 'k':
-            return getKnightMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
+            return getKnightMoves(fileIndex, rankIndex, encryptedOccupiedMoves).map((move) => moveToKey(move));
         case 'b':
-            return getBishopMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
+            return getBishopMoves(fileIndex, rankIndex, { encryptedCapturedMoves, encryptedOccupiedMoves }).map(
+                (move) => moveToKey(move)
+            );
         case 'r':
-            return getRookMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
+            return getRookMoves(fileIndex, rankIndex, { encryptedCapturedMoves, encryptedOccupiedMoves }).map((move) =>
+                moveToKey(move)
+            );
         case 'q':
-            return getQueenMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
+            return getQueenMoves(fileIndex, rankIndex, { encryptedCapturedMoves, encryptedOccupiedMoves }).map((move) =>
+                moveToKey(move)
+            );
         case 'K':
-            return getKingMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
+            return getKingMoves(fileIndex, rankIndex, encryptedOccupiedMoves).map((move) => moveToKey(move));
         default:
             console.error('Invalid piece name');
             return [];
@@ -159,7 +175,14 @@ function getKnightMoves(fileIndex: number, rankIndex: number, takenEncryptedMove
     return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
 }
 
-function getBishopMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
+function getBishopMoves(
+    fileIndex: number,
+    rankIndex: number,
+    takenEncryptedMoves: {
+        encryptedCapturedMoves: EncryptedMove[];
+        encryptedOccupiedMoves: EncryptedMove[];
+    }
+): Move[] {
     const encryptedMoves: EncryptedMove[] = [];
 
     for (const [offsetFile, offsetRank] of BISHOP_OFFSETS) {
@@ -169,7 +192,12 @@ function getBishopMoves(fileIndex: number, rankIndex: number, takenEncryptedMove
         while (targetFile >= 0 && targetFile < 8 && targetRank >= 0 && targetRank < 8) {
             const encryptedMove = encrypt([targetFile, targetRank]);
 
-            if (takenEncryptedMoves?.includes(encryptedMove)) {
+            if (takenEncryptedMoves.encryptedCapturedMoves.includes(encryptedMove)) {
+                encryptedMoves.push(encryptedMove);
+                break;
+            }
+
+            if (takenEncryptedMoves.encryptedOccupiedMoves.includes(encryptedMove)) {
                 break;
             }
 
@@ -183,7 +211,14 @@ function getBishopMoves(fileIndex: number, rankIndex: number, takenEncryptedMove
     return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
 }
 
-function getRookMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
+function getRookMoves(
+    fileIndex: number,
+    rankIndex: number,
+    takenEncryptedMoves: {
+        encryptedCapturedMoves: EncryptedMove[];
+        encryptedOccupiedMoves: EncryptedMove[];
+    }
+): Move[] {
     const encryptedMoves: EncryptedMove[] = [];
 
     for (const [offsetFile, offsetRank] of ROOK_OFFSETS) {
@@ -193,7 +228,7 @@ function getRookMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?
         while (targetFile >= 0 && targetFile < 8 && targetRank >= 0 && targetRank < 8) {
             const encryptedMove = encrypt([targetFile, targetRank]);
 
-            if (takenEncryptedMoves?.includes(encryptedMove)) {
+            if (takenEncryptedMoves.encryptedOccupiedMoves.includes(encryptedMove)) {
                 break;
             }
 
@@ -207,7 +242,14 @@ function getRookMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?
     return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
 }
 
-function getQueenMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
+function getQueenMoves(
+    fileIndex: number,
+    rankIndex: number,
+    takenEncryptedMoves: {
+        encryptedCapturedMoves: EncryptedMove[];
+        encryptedOccupiedMoves: EncryptedMove[];
+    }
+): Move[] {
     const rookMoves = getRookMoves(fileIndex, rankIndex, takenEncryptedMoves);
     const bishopMoves = getBishopMoves(fileIndex, rankIndex, takenEncryptedMoves);
 

@@ -61,20 +61,30 @@ const chessReducer = (state: ChessState, action: ChessAction) => {
             }
 
             // Creates a set of taken square keys for faster lookup
-            const takenSquareKeys = new Set<string>();
+            const capturedKeys = new Set<string>();
+            const occupiedKeys = new Set<string>();
+
             for (const row of board) {
                 for (const square of row) {
+                    if (square.value && square.value.charAt(0) !== currentSquare.value?.charAt(0)) {
+                        capturedKeys.add(square.key);
+                        continue;
+                    }
+
                     if (
                         square.value?.charAt(0) === currentSquare.value?.charAt(0) ||
                         (currentSquare.value?.charAt(1) === 'p' && square.value)
                     ) {
-                        takenSquareKeys.add(square.key);
+                        occupiedKeys.add(square.key);
                     }
                 }
             }
 
             const possibleMoves: string[] = currentSquare.value
-                ? getChessPieceMoves(currentSquare.key, currentSquare.value, Array.from(takenSquareKeys.values()))
+                ? getChessPieceMoves(currentSquare.key, currentSquare.value, {
+                      capturedKeys: Array.from(capturedKeys.values()),
+                      occupiedKeys: Array.from(occupiedKeys.values()),
+                  })
                 : [];
 
             // Sets possible moves for the selected piece
