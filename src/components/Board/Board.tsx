@@ -1,12 +1,12 @@
-import { getPieceEmoji } from 'src/utils/board';
+import { getPieceEmoji } from 'src/utils/chess';
 import * as css from 'src/utils/css';
-import { useBoard } from 'src/hooks/board';
+import { useChess } from 'src/hooks/chess';
 import { selectSquare } from 'src/actions/board';
 
 import './Board.css';
 
 const Board = () => {
-    const [{ board, selectedSquare }, dispatch] = useBoard();
+    const [{ board, selectedSquare }, dispatch] = useChess();
 
     return (
         <div className='board'>

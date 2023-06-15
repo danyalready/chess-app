@@ -1,7 +1,7 @@
 import type { Board } from 'src/types/chess';
 
 export const FILE_LETTERS = 'abcdefgh';
-export const RANK_LETTERS = '12345678';
+export const RANK_NUMBERS = '12345678';
 
 export const KNIGHT_OFFSETS = [
     [-2, -1],

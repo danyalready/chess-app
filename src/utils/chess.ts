@@ -1,4 +1,4 @@
-import { BISHOP_OFFSETS, FILE_LETTERS, KING_OFFSETS, KNIGHT_OFFSETS, RANK_LETTERS } from 'src/constants/chess';
+import { BISHOP_OFFSETS, FILE_LETTERS, KING_OFFSETS, KNIGHT_OFFSETS, RANK_NUMBERS } from 'src/constants/chess';
 
 import type { Piece } from 'src/types/chess';
 
@@ -33,10 +33,15 @@ export function getPieceEmoji(pieceCode: Piece) {
     }
 }
 
-export function getChessPieceMoves(squareKey: string, piece: Piece): string[] {
+export function getChessPieceMoves(squareKey: string, piece: Piece, takenSquareKeys?: string[]): string[] {
     // Convert square key to file and rank indices
     const fileIndex = FILE_LETTERS.indexOf(squareKey.charAt(0));
-    const rankIndex = RANK_LETTERS.indexOf(squareKey.charAt(1));
+    const rankIndex = RANK_NUMBERS.indexOf(squareKey.charAt(1));
+
+    const takenSquareIndexes: Array<[number, number]> = (takenSquareKeys || []).map((squareKey) => [
+        FILE_LETTERS.indexOf(squareKey.charAt(0)),
+        RANK_NUMBERS.indexOf(squareKey.charAt(1)),
+    ]);
 
     // Convert piece to color and name
     const pieceName = piece.charAt(1);
@@ -51,17 +56,17 @@ export function getChessPieceMoves(squareKey: string, piece: Piece): string[] {
     // Determine possible moves based on piece name and color
     switch (pieceName) {
         case 'p':
-            return getPawnMoves(fileIndex, rankIndex, pieceColor);
+            return getPawnMoves(fileIndex, rankIndex, pieceColor, takenSquareIndexes);
         case 'k':
-            return getKnightMoves(fileIndex, rankIndex);
+            return getKnightMoves(fileIndex, rankIndex, takenSquareIndexes);
         case 'b':
-            return getBishopMoves(fileIndex, rankIndex);
+            return getBishopMoves(fileIndex, rankIndex, takenSquareIndexes);
         case 'r':
-            return getRookMoves(fileIndex, rankIndex);
+            return getRookMoves(fileIndex, rankIndex, takenSquareIndexes);
         case 'q':
-            return getQueenMoves(fileIndex, rankIndex);
+            return getQueenMoves(fileIndex, rankIndex, takenSquareIndexes);
         case 'K':
-            return getKingMoves(fileIndex, rankIndex);
+            return getKingMoves(fileIndex, rankIndex, takenSquareIndexes);
         default:
             console.error('Invalid piece name');
             return [];
@@ -73,11 +78,16 @@ function toKeys(moves: number[]): string[] {
         const fileIndex = move % 8;
         const rankIndex = Math.floor(move / 8);
 
-        return FILE_LETTERS[fileIndex] + RANK_LETTERS[rankIndex];
+        return FILE_LETTERS[fileIndex] + RANK_NUMBERS[rankIndex];
     });
 }
 
-function getPawnMoves(fileIndex: number, rankIndex: number, pieceColor: string): string[] {
+function getPawnMoves(
+    fileIndex: number,
+    rankIndex: number,
+    pieceColor: string,
+    takenSquareIndexes: Array<[number, number]>
+): string[] {
     const moves: number[] = [];
     const direction = pieceColor === 'w' ? 1 : -1;
 
@@ -94,7 +104,7 @@ function getPawnMoves(fileIndex: number, rankIndex: number, pieceColor: string):
     return toKeys(moves);
 }
 
-function getKnightMoves(fileIndex: number, rankIndex: number): string[] {
+function getKnightMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
     const moves: number[] = [];
 
     for (const [offsetFile, offsetRank] of KNIGHT_OFFSETS) {
@@ -109,7 +119,7 @@ function getKnightMoves(fileIndex: number, rankIndex: number): string[] {
     return toKeys(moves);
 }
 
-function getBishopMoves(fileIndex: number, rankIndex: number): string[] {
+function getBishopMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
     const moves: number[] = [];
 
     for (const [offsetFile, offsetRank] of BISHOP_OFFSETS) {
@@ -126,7 +136,7 @@ function getBishopMoves(fileIndex: number, rankIndex: number): string[] {
     return toKeys(moves);
 }
 
-function getRookMoves(fileIndex: number, rankIndex: number): string[] {
+function getRookMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
     const moves: number[] = [];
 
     // Horizontal moves
@@ -146,11 +156,14 @@ function getRookMoves(fileIndex: number, rankIndex: number): string[] {
     return toKeys(moves);
 }
 
-function getQueenMoves(fileIndex: number, rankIndex: number): string[] {
-    return getRookMoves(fileIndex, rankIndex).concat(getBishopMoves(fileIndex, rankIndex));
+function getQueenMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
+    const rookMoves = getRookMoves(fileIndex, rankIndex, takenSquareIndexes);
+    const bishopMoves = getBishopMoves(fileIndex, rankIndex, takenSquareIndexes);
+
+    return rookMoves.concat(bishopMoves);
 }
 
-function getKingMoves(fileIndex: number, rankIndex: number): string[] {
+function getKingMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
     const moves: number[] = [];
 
     for (const [offsetFile, offsetRank] of KING_OFFSETS) {

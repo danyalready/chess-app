@@ -44,9 +44,6 @@
     opacity: 0.15;
 }
 
-.board-square--move {
-}
-
 .board-square--move::before {
     content: '';
     position: absolute;
