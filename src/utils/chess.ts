@@ -99,9 +99,10 @@ export function getChessPieceMoves(
     // Determine possible moves based on piece name and color
     switch (pieceName) {
         case 'p':
-            return getPawnMoves(fileIndex, rankIndex, pieceColor, encryptedOccupiedMoves).map((move) =>
-                moveToKey(move)
-            );
+            return getPawnMoves(fileIndex, rankIndex, pieceColor, {
+                encryptedCapturedMoves,
+                encryptedOccupiedMoves,
+            }).map((move) => moveToKey(move));
         case 'k':
             return getKnightMoves(fileIndex, rankIndex, encryptedOccupiedMoves).map((move) => moveToKey(move));
         case 'b':
@@ -128,7 +129,10 @@ function getPawnMoves(
     fileIndex: number,
     rankIndex: number,
     pieceColor: string,
-    takenEncryptedMoves?: EncryptedMove[]
+    takenEncryptedMoves: {
+        encryptedCapturedMoves: EncryptedMove[];
+        encryptedOccupiedMoves: EncryptedMove[];
+    }
 ): Move[] {
     const encryptedMoves: EncryptedMove[] = [];
     const direction = pieceColor === 'w' ? 1 : -1;
@@ -136,9 +140,22 @@ function getPawnMoves(
     // Single move forward
     if (rankIndex + direction >= 0 && rankIndex + direction < 8) {
         const encryptedMove = encrypt([fileIndex, rankIndex + direction]);
+        const encryptedLMove = encrypt([fileIndex - 1, rankIndex + direction]);
+        const encryptedRMove = encrypt([fileIndex + 1, rankIndex + direction]);
 
-        if (takenEncryptedMoves?.includes(encryptedMove)) {
-            return [];
+        if (takenEncryptedMoves.encryptedCapturedMoves.includes(encryptedLMove)) {
+            encryptedMoves.push(encryptedLMove);
+        }
+
+        if (takenEncryptedMoves.encryptedCapturedMoves.includes(encryptedRMove)) {
+            encryptedMoves.push(encryptedRMove);
+        }
+
+        if (
+            takenEncryptedMoves.encryptedOccupiedMoves.includes(encryptedMove) ||
+            takenEncryptedMoves.encryptedCapturedMoves.includes(encryptedMove)
+        ) {
+            return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
         }
 
         encryptedMoves.push(encryptedMove);
@@ -148,7 +165,10 @@ function getPawnMoves(
     if ((rankIndex === 1 && pieceColor === 'w') || (rankIndex === 6 && pieceColor === 'b')) {
         const encryptedMove = encrypt([fileIndex, rankIndex + 2 * direction]);
 
-        if (!takenEncryptedMoves?.includes(encryptedMove)) {
+        if (
+            !takenEncryptedMoves.encryptedOccupiedMoves.includes(encryptedMove) &&
+            !takenEncryptedMoves.encryptedCapturedMoves.includes(encryptedMove)
+        ) {
             encryptedMoves.push(encryptedMove);
         }
     }
