@@ -248,6 +248,11 @@ function getRookMoves(
         while (targetFile >= 0 && targetFile < 8 && targetRank >= 0 && targetRank < 8) {
             const encryptedMove = encrypt([targetFile, targetRank]);
 
+            if (takenEncryptedMoves.encryptedCapturedMoves.includes(encryptedMove)) {
+                encryptedMoves.push(encryptedMove);
+                break;
+            }
+
             if (takenEncryptedMoves.encryptedOccupiedMoves.includes(encryptedMove)) {
                 break;
             }
