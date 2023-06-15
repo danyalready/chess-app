@@ -220,7 +220,11 @@ function getKingMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?
         const targetRank = rankIndex + offsetRank;
 
         if (targetFile >= 0 && targetFile < 8 && targetRank >= 0 && targetRank < 8) {
-            encryptedMoves.push(encrypt([targetFile, targetRank]));
+            const encryptedMove = encrypt([targetFile, targetRank]);
+
+            if (!takenEncryptedMoves?.includes(encryptedMove)) {
+                encryptedMoves.push(encryptedMove);
+            }
         }
     }
 
