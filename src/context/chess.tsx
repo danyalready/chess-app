@@ -54,10 +54,7 @@ const chessReducer = (state: ChessState, action: ChessAction) => {
 
             // Creates updated board with possible moves
             const updatedBoard = state.board.map((row) =>
-                row.map((square) => {
-                    const isMove = takenSquareKeys.has(square.key) ? false : possibleMoves.includes(square.key);
-                    return { ...square, isMove };
-                })
+                row.map((square) => ({ ...square, isMove: possibleMoves.includes(square.key) }))
             );
 
             return { ...state, selectedSquare: action.payload, board: updatedBoard };
