@@ -121,9 +121,11 @@ function getPawnMoves(
     if (rankIndex + direction >= 0 && rankIndex + direction < 8) {
         const encryptedMove = encrypt([fileIndex, rankIndex + direction]);
 
-        if (!takenEncryptedMoves?.includes(encryptedMove)) {
-            encryptedMoves.push(encryptedMove);
+        if (takenEncryptedMoves?.includes(encryptedMove)) {
+            return [];
         }
+
+        encryptedMoves.push(encryptedMove);
     }
 
     // Double move forward from the starting rank
