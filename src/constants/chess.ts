@@ -21,6 +21,13 @@ export const BISHOP_OFFSETS = [
     [1, 1],
 ];
 
+export const ROOK_OFFSETS = [
+    [-1, 0],
+    [0, 1],
+    [1, 0],
+    [0, -1],
+];
+
 export const KING_OFFSETS = [
     [-1, -1],
     [-1, 0],
