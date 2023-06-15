@@ -38,27 +38,49 @@ const initialChessState: ChessState = {
 const chessReducer = (state: ChessState, action: ChessAction) => {
     switch (action.type) {
         case 'selectSquare': {
+            const currentSquare = action.payload;
+            const { board, selectedSquare } = state;
+
+            // Moves the selected piece to the selected move square
+            if (selectedSquare?.value && currentSquare.isMove) {
+                const updatedBoard = board.map((row) => {
+                    return row.map((square) => {
+                        if (square.key === selectedSquare.key) {
+                            return { ...square, value: null };
+                        }
+
+                        if (square.key === currentSquare.key) {
+                            return { ...square, value: selectedSquare.value, isMove: false };
+                        }
+
+                        return { ...square, isMove: false };
+                    });
+                });
+
+                return { ...state, board: updatedBoard, selectedSquare: null };
+            }
+
             // Creates a set of taken square keys for faster lookup
             const takenSquareKeys = new Set<string>();
-            for (const row of state.board) {
+            for (const row of board) {
                 for (const square of row) {
                     if (
-                        square.value?.charAt(0) === action.payload.value?.charAt(0) ||
-                        (action.payload.value?.charAt(1) === 'p' && square.value)
+                        square.value?.charAt(0) === currentSquare.value?.charAt(0) ||
+                        (currentSquare.value?.charAt(1) === 'p' && square.value)
                     ) {
                         takenSquareKeys.add(square.key);
                     }
                 }
             }
 
-            const possibleMoves: string[] = action.payload.value
-                ? getChessPieceMoves(action.payload.key, action.payload.value, Array.from(takenSquareKeys.values()))
+            const possibleMoves: string[] = currentSquare.value
+                ? getChessPieceMoves(currentSquare.key, currentSquare.value, Array.from(takenSquareKeys.values()))
                 : [];
 
-            // Creates updated board with possible moves
-            const updatedBoard = state.board.map((row) =>
-                row.map((square) => ({ ...square, isMove: possibleMoves.includes(square.key) }))
-            );
+            // Sets possible moves for the selected piece
+            const updatedBoard = state.board.map((row) => {
+                return row.map((square) => ({ ...square, isMove: possibleMoves.includes(square.key) }));
+            });
 
             return { ...state, selectedSquare: action.payload, board: updatedBoard };
         }

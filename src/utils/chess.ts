@@ -1,10 +1,10 @@
 import {
-    BISHOP_OFFSETS,
     FILE_LETTERS,
-    KING_OFFSETS,
-    KNIGHT_OFFSETS,
     RANK_NUMBERS,
+    KING_OFFSETS,
     ROOK_OFFSETS,
+    BISHOP_OFFSETS,
+    KNIGHT_OFFSETS,
 } from 'src/constants/chess';
 
 import type { Piece } from 'src/types/chess';
