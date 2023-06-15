@@ -1,4 +1,11 @@
-import { BISHOP_OFFSETS, FILE_LETTERS, KING_OFFSETS, KNIGHT_OFFSETS, RANK_NUMBERS } from 'src/constants/chess';
+import {
+    BISHOP_OFFSETS,
+    FILE_LETTERS,
+    KING_OFFSETS,
+    KNIGHT_OFFSETS,
+    RANK_NUMBERS,
+    ROOK_OFFSETS,
+} from 'src/constants/chess';
 
 import type { Piece } from 'src/types/chess';
 
@@ -177,17 +184,21 @@ function getBishopMoves(fileIndex: number, rankIndex: number, takenEncryptedMove
 function getRookMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
     const encryptedMoves: EncryptedMove[] = [];
 
-    // Horizontal moves
-    for (let targetFile = 0; targetFile < 8; targetFile++) {
-        if (targetFile !== fileIndex) {
-            encryptedMoves.push(encrypt([targetFile, rankIndex]));
-        }
-    }
+    for (const [offsetFile, offsetRank] of ROOK_OFFSETS) {
+        let targetFile = fileIndex + offsetFile;
+        let targetRank = rankIndex + offsetRank;
 
-    // Vertical moves
-    for (let targetRank = 0; targetRank < 8; targetRank++) {
-        if (targetRank !== rankIndex) {
-            encryptedMoves.push(encrypt([fileIndex, targetRank]));
+        while (targetFile >= 0 && targetFile < 8 && targetRank >= 0 && targetRank < 8) {
+            const encryptedMove = encrypt([targetFile, targetRank]);
+
+            if (takenEncryptedMoves?.includes(encryptedMove)) {
+                break;
+            }
+
+            encryptedMoves.push(encryptedMove);
+
+            targetFile += offsetFile;
+            targetRank += offsetRank;
         }
     }
 
