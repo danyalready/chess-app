@@ -36,10 +36,11 @@ const initialChessState: ChessState = {
 };
 
 const chessReducer = (state: ChessState, action: ChessAction) => {
+    const { board, selectedSquare } = state;
+
     switch (action.type) {
         case 'selectSquare': {
             const currentSquare = action.payload;
-            const { board, selectedSquare } = state;
 
             // Moves the selected piece to the selected move square
             if (selectedSquare?.value && currentSquare.isMove) {
@@ -93,6 +94,11 @@ const chessReducer = (state: ChessState, action: ChessAction) => {
             });
 
             return { ...state, selectedSquare: action.payload, board: updatedBoard };
+        }
+        case 'unselectSquare': {
+            const updatedBoard = board.map((row) => row.map((square) => ({ ...square, isMove: false })));
+
+            return { ...state, selectedSquare: null, board: updatedBoard };
         }
         default:
             return state;

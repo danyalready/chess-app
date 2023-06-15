@@ -1,12 +1,22 @@
+import { useEffect } from 'react';
+
 import { getPieceEmoji } from 'src/utils/chess';
 import * as css from 'src/utils/css';
 import { useChess } from 'src/hooks/chess';
-import { selectSquare } from 'src/actions/board';
+import { selectSquare, unselectSquare } from 'src/actions/board';
 
 import './Board.css';
 
 const Board = () => {
     const [{ board, selectedSquare }, dispatch] = useChess();
+
+    useEffect(() => {
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                unselectSquare(dispatch);
+            }
+        });
+    }, [dispatch]);
 
     return (
         <div className='board'>
