@@ -33,19 +33,47 @@ export function getPieceEmoji(pieceCode: Piece) {
     }
 }
 
-export function getChessPieceMoves(squareKey: string, piece: Piece, takenSquareKeys?: string[]): string[] {
+type Move = [number, number];
+type EncryptedMove = number;
+
+function keyToMove(key: string): Move {
+    const fileIndex = FILE_LETTERS.indexOf(key.charAt(0));
+    const rankIndex = RANK_NUMBERS.indexOf(key.charAt(1));
+
+    return [fileIndex, rankIndex];
+}
+
+function moveToKey(move: Move): string {
+    const fileIndex = move[0];
+    const rankIndex = move[1];
+
+    return FILE_LETTERS.charAt(fileIndex) + RANK_NUMBERS.charAt(rankIndex);
+}
+
+function decrypt(encryptedMove: EncryptedMove): Move {
+    const fileIndex = encryptedMove % 8;
+    const rankIndex = Math.floor(encryptedMove / 8);
+
+    return [fileIndex, rankIndex];
+}
+
+function encrypt(move: Move): EncryptedMove {
+    const fileIndex = move[0];
+    const rankIndex = move[1];
+
+    return fileIndex + rankIndex * 8;
+}
+
+export function getChessPieceMoves(squareKey: string, piece: Piece, takenKeys?: string[]): string[] {
     // Convert square key to file and rank indices
     const fileIndex = FILE_LETTERS.indexOf(squareKey.charAt(0));
     const rankIndex = RANK_NUMBERS.indexOf(squareKey.charAt(1));
 
-    const takenSquareIndexes: Array<[number, number]> = (takenSquareKeys || []).map((squareKey) => [
-        FILE_LETTERS.indexOf(squareKey.charAt(0)),
-        RANK_NUMBERS.indexOf(squareKey.charAt(1)),
-    ]);
+    const takenMoves: Move[] = (takenKeys || []).map((takenKey) => keyToMove(takenKey));
+    const takenEncryptedMoves = takenMoves.map((move) => encrypt(move));
 
-    // Convert piece to color and name
-    const pieceName = piece.charAt(1);
     const pieceColor = piece.charAt(0);
+    const pieceName = piece.charAt(1);
 
     // Validate square key
     if (fileIndex === -1 || rankIndex === -1) {
@@ -56,124 +84,116 @@ export function getChessPieceMoves(squareKey: string, piece: Piece, takenSquareK
     // Determine possible moves based on piece name and color
     switch (pieceName) {
         case 'p':
-            return getPawnMoves(fileIndex, rankIndex, pieceColor, takenSquareIndexes);
+            return getPawnMoves(fileIndex, rankIndex, pieceColor, takenEncryptedMoves).map((move) => moveToKey(move));
         case 'k':
-            return getKnightMoves(fileIndex, rankIndex, takenSquareIndexes);
+            return getKnightMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
         case 'b':
-            return getBishopMoves(fileIndex, rankIndex, takenSquareIndexes);
+            return getBishopMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
         case 'r':
-            return getRookMoves(fileIndex, rankIndex, takenSquareIndexes);
+            return getRookMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
         case 'q':
-            return getQueenMoves(fileIndex, rankIndex, takenSquareIndexes);
+            return getQueenMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
         case 'K':
-            return getKingMoves(fileIndex, rankIndex, takenSquareIndexes);
+            return getKingMoves(fileIndex, rankIndex, takenEncryptedMoves).map((move) => moveToKey(move));
         default:
             console.error('Invalid piece name');
             return [];
     }
 }
 
-function toKeys(moves: number[]): string[] {
-    return moves.map((move) => {
-        const fileIndex = move % 8;
-        const rankIndex = Math.floor(move / 8);
-
-        return FILE_LETTERS[fileIndex] + RANK_NUMBERS[rankIndex];
-    });
-}
-
 function getPawnMoves(
     fileIndex: number,
     rankIndex: number,
     pieceColor: string,
-    takenSquareIndexes: Array<[number, number]>
-): string[] {
-    const moves: number[] = [];
+    takenEncryptedMoves?: EncryptedMove[]
+): Move[] {
+    const encryptedMoves: EncryptedMove[] = [];
     const direction = pieceColor === 'w' ? 1 : -1;
 
     // Single move forward
     if (rankIndex + direction >= 0 && rankIndex + direction < 8) {
-        moves.push(fileIndex + (rankIndex + direction) * 8);
+        encryptedMoves.push(encrypt([fileIndex, rankIndex + direction]));
     }
 
     // Double move forward from the starting rank
     if ((rankIndex === 1 && pieceColor === 'w') || (rankIndex === 6 && pieceColor === 'b')) {
-        moves.push(fileIndex + (rankIndex + 2 * direction) * 8);
+        encryptedMoves.push(encrypt([fileIndex, rankIndex + 2 * direction]));
     }
 
-    return toKeys(moves);
+    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
 }
 
-function getKnightMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
-    const moves: number[] = [];
+function getKnightMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
+    const encryptedMoves: EncryptedMove[] = [];
 
     for (const [offsetFile, offsetRank] of KNIGHT_OFFSETS) {
         const targetFile = fileIndex + offsetFile;
         const targetRank = rankIndex + offsetRank;
 
         if (targetFile >= 0 && targetFile < 8 && targetRank >= 0 && targetRank < 8) {
-            moves.push(targetFile + targetRank * 8);
+            encryptedMoves.push(encrypt([targetFile, targetRank]));
         }
     }
 
-    return toKeys(moves);
+    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
 }
 
-function getBishopMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
-    const moves: number[] = [];
+function getBishopMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
+    const encryptedMoves: EncryptedMove[] = [];
 
     for (const [offsetFile, offsetRank] of BISHOP_OFFSETS) {
         let targetFile = fileIndex + offsetFile;
         let targetRank = rankIndex + offsetRank;
 
         while (targetFile >= 0 && targetFile < 8 && targetRank >= 0 && targetRank < 8) {
-            moves.push(targetFile + targetRank * 8);
+            encryptedMoves.push(encrypt([targetFile, targetRank]));
+
             targetFile += offsetFile;
             targetRank += offsetRank;
         }
     }
 
-    return toKeys(moves);
+    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
 }
 
-function getRookMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
-    const moves: number[] = [];
+function getRookMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
+    const encryptedMoves: EncryptedMove[] = [];
 
     // Horizontal moves
     for (let targetFile = 0; targetFile < 8; targetFile++) {
         if (targetFile !== fileIndex) {
-            moves.push(targetFile + rankIndex * 8);
+            encryptedMoves.push(encrypt([targetFile, rankIndex]));
         }
     }
 
     // Vertical moves
     for (let targetRank = 0; targetRank < 8; targetRank++) {
         if (targetRank !== rankIndex) {
-            moves.push(fileIndex + targetRank * 8);
+            encryptedMoves.push(encrypt([fileIndex, targetRank]));
         }
     }
 
-    return toKeys(moves);
+    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
 }
 
-function getQueenMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
-    const rookMoves = getRookMoves(fileIndex, rankIndex, takenSquareIndexes);
-    const bishopMoves = getBishopMoves(fileIndex, rankIndex, takenSquareIndexes);
+function getQueenMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
+    const rookMoves = getRookMoves(fileIndex, rankIndex, takenEncryptedMoves);
+    const bishopMoves = getBishopMoves(fileIndex, rankIndex, takenEncryptedMoves);
 
     return rookMoves.concat(bishopMoves);
 }
 
-function getKingMoves(fileIndex: number, rankIndex: number, takenSquareIndexes: Array<[number, number]>): string[] {
-    const moves: number[] = [];
+function getKingMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
+    const encryptedMoves: EncryptedMove[] = [];
 
     for (const [offsetFile, offsetRank] of KING_OFFSETS) {
         const targetFile = fileIndex + offsetFile;
         const targetRank = rankIndex + offsetRank;
 
         if (targetFile >= 0 && targetFile < 8 && targetRank >= 0 && targetRank < 8) {
-            moves.push(targetFile + targetRank * 8);
+            encryptedMoves.push(encrypt([targetFile, targetRank]));
         }
     }
 
-    return toKeys(moves);
+    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
 }
