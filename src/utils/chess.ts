@@ -1,11 +1,4 @@
-import {
-    FILE_LETTERS,
-    RANK_NUMBERS,
-    KING_OFFSETS,
-    ROOK_OFFSETS,
-    BISHOP_OFFSETS,
-    KNIGHT_OFFSETS,
-} from 'src/constants/chess';
+import { FILE_LETTERS, RANK_NUMBERS, KING_OFFSETS, ROOK_OFFSETS, BISHOP_OFFSETS, KNIGHT_OFFSETS } from 'src/constants/chess';
 
 import type { Piece } from 'src/types/chess';
 
@@ -81,11 +74,11 @@ export function getChessPieceMoves(
     const rankIndex = RANK_NUMBERS.indexOf(squareKey.charAt(1));
 
     const { capturedKeys, occupiedKeys } = takenKeys;
-    const capturedMoves = capturedKeys.map((capturedKey) => keyToMove(capturedKey));
-    const occupiedMoves = occupiedKeys.map((occupiedKey) => keyToMove(occupiedKey));
+    const capturedMoves = capturedKeys.map(keyToMove);
+    const occupiedMoves = occupiedKeys.map(keyToMove);
 
-    const encryptedCapturedMoves = capturedMoves.map((capturedMove) => encrypt(capturedMove));
-    const encryptedOccupiedMoves = occupiedMoves.map((occupiedMove) => encrypt(occupiedMove));
+    const encryptedCapturedMoves = capturedMoves.map(encrypt);
+    const encryptedOccupiedMoves = occupiedMoves.map(encrypt);
 
     const pieceColor = piece.charAt(0);
     const pieceName = piece.charAt(1);
@@ -102,23 +95,17 @@ export function getChessPieceMoves(
             return getPawnMoves(fileIndex, rankIndex, pieceColor, {
                 encryptedCapturedMoves,
                 encryptedOccupiedMoves,
-            }).map((move) => moveToKey(move));
+            }).map(moveToKey);
         case 'k':
-            return getKnightMoves(fileIndex, rankIndex, encryptedOccupiedMoves).map((move) => moveToKey(move));
+            return getKnightMoves(fileIndex, rankIndex, encryptedOccupiedMoves).map(moveToKey);
         case 'b':
-            return getBishopMoves(fileIndex, rankIndex, { encryptedCapturedMoves, encryptedOccupiedMoves }).map(
-                (move) => moveToKey(move)
-            );
+            return getBishopMoves(fileIndex, rankIndex, { encryptedCapturedMoves, encryptedOccupiedMoves }).map(moveToKey);
         case 'r':
-            return getRookMoves(fileIndex, rankIndex, { encryptedCapturedMoves, encryptedOccupiedMoves }).map((move) =>
-                moveToKey(move)
-            );
+            return getRookMoves(fileIndex, rankIndex, { encryptedCapturedMoves, encryptedOccupiedMoves }).map(moveToKey);
         case 'q':
-            return getQueenMoves(fileIndex, rankIndex, { encryptedCapturedMoves, encryptedOccupiedMoves }).map((move) =>
-                moveToKey(move)
-            );
+            return getQueenMoves(fileIndex, rankIndex, { encryptedCapturedMoves, encryptedOccupiedMoves }).map(moveToKey);
         case 'K':
-            return getKingMoves(fileIndex, rankIndex, encryptedOccupiedMoves).map((move) => moveToKey(move));
+            return getKingMoves(fileIndex, rankIndex, encryptedOccupiedMoves).map(moveToKey);
         default:
             console.error('Invalid piece name');
             return [];
@@ -155,7 +142,7 @@ function getPawnMoves(
             takenEncryptedMoves.encryptedOccupiedMoves.includes(encryptedMove) ||
             takenEncryptedMoves.encryptedCapturedMoves.includes(encryptedMove)
         ) {
-            return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
+            return encryptedMoves.map(decrypt);
         }
 
         encryptedMoves.push(encryptedMove);
@@ -173,7 +160,7 @@ function getPawnMoves(
         }
     }
 
-    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
+    return encryptedMoves.map(decrypt);
 }
 
 function getKnightMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?: EncryptedMove[]): Move[] {
@@ -192,7 +179,7 @@ function getKnightMoves(fileIndex: number, rankIndex: number, takenEncryptedMove
         }
     }
 
-    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
+    return encryptedMoves.map(decrypt);
 }
 
 function getBishopMoves(
@@ -228,7 +215,7 @@ function getBishopMoves(
         }
     }
 
-    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
+    return encryptedMoves.map(decrypt);
 }
 
 function getRookMoves(
@@ -264,7 +251,7 @@ function getRookMoves(
         }
     }
 
-    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
+    return encryptedMoves.map(decrypt);
 }
 
 function getQueenMoves(
@@ -297,5 +284,5 @@ function getKingMoves(fileIndex: number, rankIndex: number, takenEncryptedMoves?
         }
     }
 
-    return encryptedMoves.map((encryptedMove) => decrypt(encryptedMove));
+    return encryptedMoves.map(decrypt);
 }
