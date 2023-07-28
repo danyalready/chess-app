@@ -1,26 +1,11 @@
-name: ESLint Rules
-
-on:
-    pull_request:
-        branches:
-            - main
-    workflow_dispatch:
-
+name: CI
+on: push
 jobs:
-    run-eslint:
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Checkout code
-                uses: actions/checkout@v2
-
-            - name: Install Node.js
-                uses: actions/setup-node@v2
-                with:
-                    node-version: '14'
-
-            - name: Insall dependencies
-                run: npm install
-
-            - name: Run ESLint
-                run: npm run lint
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install modules
+      run: yarn
+    - name: Run ESLint
+      run: eslint . --ext .js,.jsx,.ts,.tsx
