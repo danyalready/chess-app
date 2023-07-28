@@ -1,0 +1,14 @@
+name: ESLint Rules
+
+on:
+    pull_request:
+        branches: [ main ]
+    workflow_dispatch:
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Run ESLint rules
+                run: yarn lint
+                shell: bash
