@@ -1,13 +1,16 @@
 name: My GitHub Workflow
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
-      - main  # Replace 'main' with your default branch name if it's different
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # You can also choose other runners if needed
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
