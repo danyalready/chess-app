@@ -10,3 +10,4 @@ export type Square = {
 
 export type BoardRow = Array<Square>;
 export type Board = Array<BoardRow>;
+export type BoardHistory = string[];

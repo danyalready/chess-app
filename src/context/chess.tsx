@@ -5,12 +5,12 @@ import { initialBoard } from 'src/constants/chess';
 
 import type { ReactNode, Dispatch } from 'react';
 import type { ChessAction } from 'src/actions/board';
-import type { Board, Square } from 'src/types/chess';
+import type { Board, Square, BoardHistory } from 'src/types/chess';
 
 type ChessState = {
     board: Board;
     selectedSquare: null | Square;
-    history: string[];
+    history: BoardHistory;
 };
 
 const initialChessState: ChessState = {
