@@ -7,22 +7,6 @@ import type { ReactNode, Dispatch } from 'react';
 import type { ChessAction } from 'src/actions/board';
 import type { Board, Square } from 'src/types/chess';
 
-// BLACK
-// [color][name] = bp - black pawn ♟
-// [color][name] = bb - black bishop ♝
-// [color][name] = bk - black knight ♞
-// [color][name] = br - black rook ♜
-// [color][name] = bq - black queen ♛
-// [color][name] = bK - black king ♚
-
-// WHITE
-// [color][name] = wp - white pawn ♙
-// [color][name] = wb - white bishop ♗
-// [color][name] = wk - white knight ♘
-// [color][name] = wk - white rook ♖
-// [color][name] = wq - white queen ♕
-// [color][name] = wK - white king ♔
-
 type ChessState = {
     board: Board;
     selectedSquare: null | Square;
@@ -42,14 +26,16 @@ const chessReducer = (state: ChessState, action: ChessAction) => {
         case 'selectSquare': {
             const currentSquare = action.payload;
 
-            // Moves the selected piece to the selected move square
+            // If a piece selected and the next selected square is a move
             if (selectedSquare?.value && currentSquare.isMove) {
                 const updatedBoard = board.map((row) => {
                     return row.map((square) => {
+                        // Removes the selected piece from it's previous position
                         if (square.key === selectedSquare.key) {
                             return { ...square, value: null };
                         }
 
+                        // Moves the selected piece to the next selected move-square
                         if (square.key === currentSquare.key) {
                             return { ...square, value: selectedSquare.value, isMove: false };
                         }
