@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { ChessContext } from 'src/context/chess';
 
-export const useChess = () => {
+export const useChessContext = () => {
     const context = useContext(ChessContext);
 
     if (!context) {

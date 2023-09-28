@@ -2,14 +2,14 @@ import { useEffect, useRef } from 'react';
 
 import { getPieceEmoji } from 'src/utils/chess';
 import * as css from 'src/utils/css';
-import { useChess } from 'src/hooks/chess';
+import { useChessContext } from 'src/hooks/chess';
 import { selectSquare, unselectSquare } from 'src/actions/board';
 
 import './Board.css';
 
 const Board = () => {
     const boardRef = useRef<HTMLDivElement>(null);
-    const [{ board, selectedSquare }, dispatch] = useChess();
+    const [{ board, selectedSquare }, dispatch] = useChessContext();
 
     useEffect(() => {
         window.addEventListener('keydown', (event) => {
@@ -26,9 +26,9 @@ const Board = () => {
     }, [dispatch]);
 
     return (
-        <div className='board' ref={boardRef}>
+        <div className="board" ref={boardRef}>
             {board.map((row, rowIndex) => (
-                <div key={rowIndex} className='board-row'>
+                <div key={rowIndex} className="board-row">
                     {row.map((square) => (
                         <div
                             key={square.key}
